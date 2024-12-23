@@ -20,6 +20,7 @@
 
 #include <string.h>
 #include <math.h>
+#include <Arduino.h>
 
 #include "libdw1000.h"
 
@@ -103,7 +104,7 @@ void* dwGetUserdata(dwDevice_t* dev)
 
 int dwConfigure(dwDevice_t* dev)
 {
-	dwEnableClock(dev, dwClockAuto);
+	dwEnableClock(dev, dwClockPll);	// TODO: Why using auto here makes it not work?
 	delayms(5);
 
 	// Reset the chip
@@ -113,9 +114,9 @@ int dwConfigure(dwDevice_t* dev)
 		dwSoftReset(dev);
 	}
 
-	if (dwGetDeviceId(dev) != 0xdeca0130) {
-		return DW_ERROR_WRONG_ID;
-	}
+	delayms(20);
+	uint32_t dev_id = dwGetDeviceId(dev);
+	dev_id = dwGetDeviceId(dev);
 
 	// Set default address
 	memset(dev->networkAndAddress, 0xff, LEN_PANADR);
@@ -127,7 +128,7 @@ int dwConfigure(dwDevice_t* dev)
 	dwSetInterruptPolarity(dev, true);
 	dwWriteSystemConfigurationRegister(dev);
 	// default interrupt mask, i.e. no interrupts
-	dwClearInterrupts(dev);
+	dwClearInterrupts(dev);	
 	dwWriteSystemEventMaskRegister(dev);
 	// load LDE micro-code
 	dwEnableClock(dev, dwClockXti);
@@ -151,7 +152,7 @@ int dwConfigure(dwDevice_t* dev)
 
 	// Initialize for default configuration (as per datasheet)
 
-	return DW_ERROR_OK;
+	return dev_id != 0xdeca0130;
 }
 
 void dwManageLDE(dwDevice_t* dev) {
@@ -173,12 +174,12 @@ void dwManageLDE(dwDevice_t* dev) {
 	pmscctrl0[1] = 0x03;
 	otpctrl[0] = 0x00;
 	otpctrl[1] = 0x80;
-	dwSpiWrite(dev, PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-	dwSpiWrite(dev, OTP_IF, OTP_CTRL_SUB, otpctrl, LEN_OTP_CTRL);
+	dwSpiWrite(dev, PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
+	dwSpiWrite(dev, OTP_IF, OTP_CTRL_SUB, otpctrl, 2);
 	delayms(5);
 	pmscctrl0[0] = 0x00;
 	pmscctrl0[1] = 0x02;
-	dwSpiWrite(dev, PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+	dwSpiWrite(dev, PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 }
 
 
