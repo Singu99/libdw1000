@@ -1315,6 +1315,34 @@ void dwSetTxPower(dwDevice_t *dev, uint32_t txPower)
 	dev->txPower = txPower;
 }
 
+void dwEnableLargePower(dwDevice_t* dev) {
+	uint8_t reg[4];
+	dwSpiRead(dev, GPIO_CTRL, GPIO_MODE_SUB, reg, LEN_GPIO_MODE);
+
+	reg[1] |= 0x40;
+	reg[2] |= 0x01;
+	reg[2] |= 0x05;
+
+	dwSpiWrite(dev, GPIO_CTRL, GPIO_MODE_SUB, reg, LEN_GPIO_MODE);
+
+	reg[0] = reg[1] = reg[2] = reg[3] = 0;
+	
+	dwSpiWrite(dev, PMSC, 0x26, reg, 2);
+
+	reg[0] = 0xC0;
+	reg[1] = 0;
+	reg[2] = 0;
+	reg[3] = 0;
+	dwSpiWrite(dev, TX_CAL, TC_PGDELAY_SUB, reg, 1);
+
+	reg[0] = 0x1f;
+	reg[1] = 0x1f;
+	reg[2] = 0x1f;
+	reg[3] = 0x1f;
+
+	dwSpiWrite(dev, TX_POWER, 0, reg, LEN_TX_POWER);
+}
+
 void dwAttachSentHandler(dwDevice_t *dev, dwHandler_t handler) {
 	dev->handleSent = handler;
 }

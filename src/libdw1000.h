@@ -141,6 +141,7 @@ void dwCommitConfiguration(dwDevice_t* dev);
 void dwWaitForResponse(dwDevice_t* dev, bool val);
 void dwSuppressFrameCheck(dwDevice_t* dev, bool val);
 void dwUseSmartPower(dwDevice_t* dev, bool smartPower);
+void dwEnableLargePower(dwDevice_t* dev);
 dwTime_t dwSetDelay(dwDevice_t* dev, const dwTime_t* delay);
 void dwSetTxRxTime(dwDevice_t* dev, const dwTime_t futureTime);
 void dwSetDataRate(dwDevice_t* dev, uint8_t rate);
